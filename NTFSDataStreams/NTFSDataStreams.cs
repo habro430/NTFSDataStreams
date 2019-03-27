@@ -35,20 +35,10 @@ namespace NTFSDataStreams
             }
         }
 
-        private FileStream stream;
-        public FileStream FileStream => stream;
-
         public NTFSDataStream(string Path, string StreamName)
         {
             this.Path = Path;
             this.StreamName = StreamName;
-        }
-        public NTFSDataStream(string Path, string StreamName, FileAccess Access, FileMode Mode, FileShare Share)
-        {
-            this.Path = Path;
-            this.StreamName = StreamName;
-
-            OpenStream(Access, Mode, Share);
         }
 
         public FileStream OpenStream(FileAccess access, FileMode mode, FileShare share)
@@ -58,18 +48,12 @@ namespace NTFSDataStreams
             SafeFileHandle handle = NativeMethods.CreateFile(fullpathstream, access, share, IntPtr.Zero, mode, 0, IntPtr.Zero);
             if (handle.IsInvalid) NativeMethods.Throw(Marshal.GetLastWin32Error(), fullpathstream);
 
-            stream = new FileStream(handle, access);
-            return stream;
+            return new FileStream(handle, access);
         }
         public void Delete()
         {
-            if (Exists())
-            {
-                if (!NativeMethods.DeleteFile(fullpathstream))
-                    NativeMethods.Throw(Marshal.GetLastWin32Error(), fullpathstream);
-            }
-            else
-                throw new PathNotFound(fullpathstream);
+            if (!NativeMethods.DeleteFile(fullpathstream))
+                NativeMethods.Throw(Marshal.GetLastWin32Error(), fullpathstream);
         }
 
         public bool Exists() => -1 != NativeMethods.GetFileAttributes(fullpathstream);
