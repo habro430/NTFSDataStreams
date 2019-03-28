@@ -6,45 +6,56 @@ namespace NTFSDataStreams.Exceptions
     public class NTFSDataStreamException : IOException
     {
         public string FullPath { get; }
-        public NTFSDataStreamException(string message, string fullpathstream)
+        public NTFSDataStreamException(string message, string pathstream)
             : base(message)
-        { FullPath = fullpathstream; }
+        { FullPath = pathstream; }
     }
-    public class PathNotFound : NTFSDataStreamException
+    public class PathNotFoundException : NTFSDataStreamException
     {    
-        public PathNotFound(string fullpathstream)
-            : base($"Path \"{fullpathstream}\" not found.", fullpathstream)
+        public PathNotFoundException(string pathstream)
+            : base($"Path \"{pathstream}\" not found.", pathstream)
         { }
     }
-    public class PathIncorrect : NTFSDataStreamException
+    public class PathIncorrectException : NTFSDataStreamException
     {
-        public PathIncorrect(string fullpathstream)
-            : base($"The path \"{fullpathstream}\" syntax is incorrect.", fullpathstream)
+        public PathIncorrectException(string pathstream)
+            : base($"The path \"{pathstream}\" syntax is incorrect.", pathstream)
         { }
     }
-    public class AccessDenied : NTFSDataStreamException
+    public class AccessDeniedException : NTFSDataStreamException
     {
-        public AccessDenied(string fullpathstream)
-            : base($"Access to the \"{fullpathstream}\" denied.", fullpathstream)
+        public AccessDeniedException(string pathstream)
+            : base($"Access to the \"{pathstream}\" denied.", pathstream)
         { }
     }
-    public class SharingVoliation : NTFSDataStreamException
+    public class SharingVoliationException : NTFSDataStreamException
     {
-        public SharingVoliation(string fullpathstream)
-            : base($"Cannot access the \"{fullpathstream}\" because it is being used by another process.", fullpathstream)
+        public SharingVoliationException(string pathstream)
+            : base($"Cannot access the \"{pathstream}\" because it is being used by another process.", pathstream)
         { }
     }
-    public class LockVoliation : NTFSDataStreamException
+    public class LockVoliationException : NTFSDataStreamException
     {
-        public LockVoliation(string fullpathstream)
-            : base($"Cannot access the \"{fullpathstream}\" because another process has locked a portion of the file.", fullpathstream)
+        public LockVoliationException(string pathstream)
+            : base($"Cannot access the \"{pathstream}\" because another process has locked a portion of the file.", pathstream)
         { }
     }
-    public class AlreadyExist : NTFSDataStreamException
+    public class AlreadyExistException : NTFSDataStreamException
     {
-        public AlreadyExist(string fullpathstream)
-            : base($"Stream \"{fullpathstream}\" already exists.", fullpathstream)
+        public AlreadyExistException(string pathstream)
+            : base($"Stream \"{pathstream}\" already exists.", pathstream)
         { }
     }
-
+    public class ReadNotSupportedException : NTFSDataStreamException
+    {
+        public ReadNotSupportedException(string pathstream)
+            : base($"Reading for stream \"{pathstream}\" not supported.", pathstream)
+        { }
+    }
+    public class WriteNotSupportedException : NTFSDataStreamException
+    {
+        public WriteNotSupportedException(string pathstream)
+            : base($"Writing for stream \"{pathstream}\" not supported.", pathstream)
+        { }
+    }
 }

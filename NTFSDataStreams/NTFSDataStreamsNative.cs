@@ -12,6 +12,8 @@ namespace NTFSDataStreams.Native
         ERROR_FILE_NOT_FOUND = 2,
         ERROR_PATH_NOT_FOUND = 3,
         ERROR_ACCESS_DENIED = 5,
+        ERROR_INVALID_DRIVE = 15,
+        ERROR_NOT_READY = 21,
         ERROR_SHARING_VIOLATION = 32,
         ERROR_LOCK_VIOLATION = 33,
         ERROR_FILE_EXISTS = 80,
@@ -30,19 +32,21 @@ namespace NTFSDataStreams.Native
                 case (int)ErrorCodes.ERROR_SUCCESS: return;
                 case (int)ErrorCodes.ERROR_FILE_NOT_FOUND:
                 case (int)ErrorCodes.ERROR_PATH_NOT_FOUND:
-                    throw new PathNotFound(path);
+                case (int)ErrorCodes.ERROR_INVALID_DRIVE:
+                case (int)ErrorCodes.ERROR_NOT_READY:
+                    throw new PathNotFoundException(path);
                 case (int)ErrorCodes.ERROR_ACCESS_DENIED:
-                    throw new AccessDenied(path);
+                    throw new AccessDeniedException(path);
                 case (int)ErrorCodes.ERROR_SHARING_VIOLATION:
-                    throw new SharingVoliation(path);
+                    throw new SharingVoliationException(path);
                 case (int)ErrorCodes.ERROR_LOCK_VIOLATION:
-                    throw new LockVoliation(path);
+                    throw new LockVoliationException(path);
                 case (int)ErrorCodes.ERROR_FILE_EXISTS:
-                    throw new AlreadyExist(path);
+                    throw new AlreadyExistException(path);
                 case (int)ErrorCodes.ERROR_BUFFER_OVERFLOW:
                 case (int)ErrorCodes.ERROR_INVALID_NAME:
                 case (int)ErrorCodes.ERROR_FILENAME_EXCED_RANGE:
-                    throw new PathIncorrect(path);
+                    throw new PathIncorrectException(path);
                 default:
                     {
                         Marshal.ThrowExceptionForHR(-2147024896 | error);

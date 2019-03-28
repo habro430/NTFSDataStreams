@@ -1,65 +1,60 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
-using NTFSDataStreams.Exceptions;
 using NTFSDataStreams.Native;
+using NTFSDataStreams.Exceptions;
 
 namespace NTFSDataStreams
 {
-    public class NTFSDataStream
+    public class NTFSDataStream : Stream
     {
-        private string fullpathstream;
-        public string FullPathStream { get { return fullpathstream; } }
+        private string _path;
+        public string Path => _path; 
 
-        private string path;
-        public string Path
+        private string _streamname;
+        public string StreamName => _streamname;
+
+        private Stream _stream;
+
+        public override bool CanRead => _stream.CanRead;
+        public override bool CanSeek => _stream.CanSeek;
+        public override bool CanWrite => _stream.CanWrite;
+
+        public override long Length => _stream.Length;
+
+        public override bool CanTimeout => _stream.CanTimeout;
+        public override int ReadTimeout
         {
-            get { return path; }
-            set
-            {
-                path = value;
-                UpdateFullPath();
-            }
+            get => _stream.ReadTimeout;
+            set => _stream.ReadTimeout = value;
+        }
+        public override int WriteTimeout
+        {
+            get => _stream.WriteTimeout;
+            set => _stream.WriteTimeout = value;
         }
 
-        private string streamname;
-        public string StreamName
+        public override long Position
         {
-            get { return streamname; }
-            set
-            {
-                streamname = value;
-                if (!string.IsNullOrEmpty(value)) UpdateFullPath();
-            }
+            get => _stream.Position;
+            set => _stream.Position = value;
         }
 
-        public NTFSDataStream(string Path, string StreamName)
+        public NTFSDataStream(string path, string streamname, FileAccess access, FileMode mode, FileShare share)
         {
-            this.Path = Path;
-            this.StreamName = StreamName;
-        }
+            _path = path;
+            _streamname = streamname;
 
-        public FileStream OpenStream(FileAccess access, FileMode mode, FileShare share)
-        {
             if (mode == FileMode.Append) mode = FileMode.OpenOrCreate;
 
-            SafeFileHandle handle = NativeMethods.CreateFile(fullpathstream, access, share, IntPtr.Zero, mode, 0, IntPtr.Zero);
-            if (handle.IsInvalid) NativeMethods.Throw(Marshal.GetLastWin32Error(), fullpathstream);
+            string streampath = BuildStreamPath(_path, _streamname);
 
-            return new FileStream(handle, access);
-        }
-        public void Delete()
-        {
-            if (!NativeMethods.DeleteFile(fullpathstream))
-                NativeMethods.Throw(Marshal.GetLastWin32Error(), fullpathstream);
-        }
+            SafeFileHandle handle = NativeMethods.CreateFile(streampath, access, share, IntPtr.Zero, mode, 0, IntPtr.Zero);
+            if (handle.IsInvalid) NativeMethods.Throw(Marshal.GetLastWin32Error(), streampath);
 
-        public bool Exists() => -1 != NativeMethods.GetFileAttributes(fullpathstream);
-        public static bool Exists(string Path, string StreamName) => -1 != NativeMethods.GetFileAttributes(BuildStreamPath(Path, StreamName));
-        
-        private void UpdateFullPath() => fullpathstream = BuildStreamPath(path, streamname);
+            _stream = new FileStream(handle, access);
+        }
 
         private static string BuildStreamPath(string Path, string StreamName)
         {
@@ -67,6 +62,39 @@ namespace NTFSDataStreams
                 return Path;
             else
                 return Path + ':' + StreamName;
+        }
+
+        public void Delete() => Delete(_path, _streamname);
+        public static void Delete(string path, string streamname)
+        {
+            string streampath = BuildStreamPath(path, streamname);
+
+            if (!NativeMethods.DeleteFile(streampath))
+                NativeMethods.Throw(Marshal.GetLastWin32Error(), streampath);
+        }
+
+        public bool Exists() => Exists(_path, _streamname);
+        public static bool Exists(string path, string streamname) => 
+            NativeMethods.GetFileAttributes(BuildStreamPath(path, streamname)) != -1;
+
+        public override void Flush() => _stream.Flush();
+
+        public override long Seek(long offset, SeekOrigin origin) => _stream.Seek(offset, origin);
+        public override void SetLength(long value) => _stream.SetLength(value);
+
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (!CanRead) throw new ReadNotSupportedException(BuildStreamPath(_path, _streamname));
+
+            return _stream.Read(buffer, offset, count);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            if (!CanWrite) throw new WriteNotSupportedException(BuildStreamPath(_path, _streamname));
+
+            _stream.Write(buffer, offset, count);
         }
     }
 }
