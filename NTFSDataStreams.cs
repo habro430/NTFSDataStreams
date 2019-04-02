@@ -58,10 +58,12 @@ namespace NTFSDataStreams
 
         private static string BuildStreamPath(string Path, string StreamName)
         {
+            string stream_path = Path;
+
             if (string.IsNullOrEmpty(StreamName))
-                return Path;
-            else
-                return Path + ':' + StreamName;
+                stream_path += ':' + StreamName;
+
+            return stream_path;
         }
 
         public void Delete() => Delete(_path, _streamname);
