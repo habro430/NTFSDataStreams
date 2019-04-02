@@ -60,7 +60,7 @@ namespace NTFSDataStreams
         {
             string stream_path = Path;
 
-            if (string.IsNullOrEmpty(StreamName))
+            if (!string.IsNullOrEmpty(StreamName))
                 stream_path += ':' + StreamName;
 
             return stream_path;
@@ -80,6 +80,7 @@ namespace NTFSDataStreams
             NativeMethods.GetFileAttributes(BuildStreamPath(path, streamname)) != -1;
 
         public override void Flush() => _stream.Flush();
+        public override void Close() => _stream.Close();
 
         public override long Seek(long offset, SeekOrigin origin) => _stream.Seek(offset, origin);
         public override void SetLength(long value) => _stream.SetLength(value);
