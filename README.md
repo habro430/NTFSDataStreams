@@ -1,5 +1,5 @@
 ## NTFSDataStreams
-it is simple class to read and write alternative NTFS data streams.
+it is simple class for read and write to alternative NTFS data streams.
 
 NTFSDataStream implements the [`Stream`](https://docs.microsoft.com/en-us/dotnet/api/system.io.stream) class.
 ```C#
